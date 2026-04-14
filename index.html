@@ -3,42 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Myanmar Voice Website</title>
+    <title>English to Myanmar Voice AI</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; }
-        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
-        textarea { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; }
-        button { background-color: #28a745; color: white; padding: 15px 30px; border: none; border-radius: 50px; cursor: pointer; font-size: 18px; margin-top: 20px; width: 100%; font-weight: bold; }
-        button:hover { background-color: #218838; }
-        h1 { color: #2c3e50; }
+        body { font-family: 'Pyidaungsu', sans-serif; text-align: center; padding: 20px; background-color: #eef2f3; }
+        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
+        h1 { color: #333; font-size: 24px; }
+        textarea { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 10px; }
+        .result-box { background: #f9f9f9; padding: 15px; border-left: 5px solid #28a745; text-align: left; margin: 10px 0; min-height: 50px; font-weight: bold; }
+        button { background-color: #007bff; color: white; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; transition: 0.3s; }
+        button:hover { background-color: #0056b3; }
+        .myanmar-btn { background-color: #28a745; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Myanmar TTS</h1>
-        <p>စာရိုက်ပြီး အသံနားထောင်ပါ</p>
+        <h1> English to Myanmar AI</h1>
+        <p>အင်္ဂလိပ်စာ ရိုက်ထည့်ပြီး မြန်မာလို နားထောင်ပါ</p>
 
-        <textarea id="text-input" rows="5" placeholder="ဒီမှာ မြန်မာလို ရိုက်ပါ..."></textarea>
-        <br>
-        <button id="speak-btn">🔊 Listen (နားထောင်မယ်)</button>
+        <textarea id="eng-input" rows="4" placeholder="Type English here... (e.g. How are you?)"></textarea>
+        
+        <button id="translate-btn"> Translate to Myanmar (ဘာသာပြန်မယ်)</button>
+
+        <div class="result-box" id="mm-output">မြန်မာဘာသာပြန် ဒီမှာပေါ်လာပါမည်...</div>
+
+        <button id="speak-btn" class="myanmar-btn"> Speak Myanmar (မြန်မာလိုနားထောင်မယ်)</button>
     </div>
 
     <script>
+        const translateBtn = document.querySelector('#translate-btn');
         const speakBtn = document.querySelector('#speak-btn');
-        const textInput = document.querySelector('#text-input');
+        const engInput = document.querySelector('#eng-input');
+        const mmOutput = document.querySelector('#mm-output');
 
-        speakBtn.addEventListener('click', () => {
-            const text = textInput.value;
-            if (text.trim() !== "") {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'my-MM'; 
-                window.speechSynthesis.speak(utterance);
-            } else {
-                alert("စာသားတစ်ခုခု အရင်ရိုက်ပေးပါခင်ဗျာ။");
+        // ဘာသာပြန်ပေးမည့် Function (Free API ကို အသုံးပြုထားသည်)
+        translateBtn.addEventListener('click', async () => {
+            const text = engInput.value.trim();
+            if (text === "") return alert("Please enter English text!");
+
+            mmOutput.innerText = "Translating... (ခဏစောင့်ပါ)";
+
+            try {
+                const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=my&dt=t&q=${encodeURI(text)}`);
+                const data = await res.json();
+                const translatedText = data[0][0][0];
+                mmOutput.innerText = translatedText;
+            } catch (error) {
+                mmOutput.innerText = "Error: ဘာသာပြန်လို့မရပါ (Internet ကို စစ်ဆေးပါ)";
             }
+        });
+
+        // မြန်မာလို အသံထွက်ပေးမည့် Function
+        speakBtn.addEventListener('click', () => {
+            const text = mmOutput.innerText;
+            if (text === "" || text.includes("...")) return alert("အရင်ဆုံး ဘာသာပြန်ပါ!");
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'my-MM';
+            utterance.rate = 0.9; // အသံပီအောင် အနည်းငယ် နှေးထားသည်
+            window.speechSynthesis.speak(utterance);
         });
     </script>
 </body>
 </html>
+
 
