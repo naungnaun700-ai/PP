@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English to Myanmar Voice AI</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; background-color: #eef2f3; }
+        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
+        textarea { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #ddd; font-size: 16px; box-sizing: border-box; margin-bottom: 10px; }
+        .result-box { background: #f9f9f9; padding: 15px; border-left: 5px solid #28a745; text-align: left; margin: 10px 0; min-height: 50px; font-weight: bold; }
+        button { background-color: #007bff; color: white; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; margin-top: 10px; }
+        .myanmar-btn { background-color: #28a745; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1> Eng to MM Voice AI</h1>
+        <textarea id="eng-input" rows="4" placeholder="English လို ရိုက်ပါ..."></textarea>
+        <button id="translate-btn"> Translate (ဘာသာပြန်မယ်)</button>
+        <div class="result-box" id="mm-output">မြန်မာဘာသာပြန် ဒီမှာပေါ်လာပါမည်...</div>
+        <button id="speak-btn" class="myanmar-btn"> Listen (အသံနားထောင်မယ်)</button>
+    </div>
+
+    <script>
+        const translateBtn = document.querySelector('#translate-btn');
+        const speakBtn = document.querySelector('#speak-btn');
+        const engInput = document.querySelector('#eng-input');
+        const mmOutput = document.querySelector('#mm-output');
+
+        translateBtn.addEventListener('click', async () => {
+            const text = engInput.value.trim();
+            if (text === "") return alert("Please enter text!");
+            mmOutput.innerText = "Translating...";
+            try {
+                const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=my&dt=t&q=${encodeURI(text)}`);
+                const data = await res.json();
+                mmOutput.innerText = data[0][0][0];
+            } catch (error) {
+                mmOutput.innerText = "Error: Internet မရှိပါ သို့မဟုတ် Error ဖြစ်နေပါသည်။";
+            }
+        });
+
+        speakBtn.addEventListener('click', () => {
+            const text = mmOutput.innerText;
+            if (text === "" || text.includes("...")) return alert("အရင်ဆုံး ဘာသာပြန်ပါ!");
+            
+            window.speechSynthesis.cancel(); 
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'my-MM';
+            utterance.rate = 0.8; 
+            window.speechSynthesis.speak(utterance);
+        });
+    </script>
+</body>
+</html>
